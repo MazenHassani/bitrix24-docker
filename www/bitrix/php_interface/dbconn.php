@@ -1,10 +1,20 @@
-<?
+<?php
+// Provision this file outside the web root; never commit deployment credentials.
+$deploymentCredentials = require '/etc/bitrix/credentials.php';
+foreach (array('crypto_key', 'db_host', 'db_name', 'db_user', 'db_password') as $credentialName) {
+    if (!is_array($deploymentCredentials) || !isset($deploymentCredentials[$credentialName])
+        || !is_string($deploymentCredentials[$credentialName]) || $deploymentCredentials[$credentialName] === ''
+        || strpos($deploymentCredentials[$credentialName], 'YOUR_') === 0) {
+        throw new RuntimeException('Missing required external Bitrix credential: ' . $credentialName);
+    }
+}
+
 define("DBPersistent", false);
 $DBType = "mysql";
-$DBHost = "localhost";
-$DBLogin = 'YOUR_DATABASE_USERNAME';
-$DBPassword = 'YOUR_DATABASE_PASSWORD';
-$DBName = "sitemanager";
+$DBHost = $deploymentCredentials['db_host'];
+$DBLogin = $deploymentCredentials['db_user'];
+$DBPassword = $deploymentCredentials['db_password'];
+$DBName = $deploymentCredentials['db_name'];
 $DBDebug = false;
 $DBDebugToFile = false;
 
